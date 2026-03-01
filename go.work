@@ -1,0 +1,16 @@
+go 1.22.0
+
+use (
+	./services/auth
+	./services/api
+	./services/messaging
+	./services/notification
+	./services/search
+	./services/file
+	./services/integration
+	./services/media
+	./services/federation
+	./packages/sdk-go
+	./packages/events
+	./packages/serviceutil
+)

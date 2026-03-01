@@ -1,0 +1,40 @@
+name: Feature Request
+description: Propose a new feature or improvement
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What problem does this solve?
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Which phase does this belong to?
+      description: See docs/dev-plan.md for phase definitions
+      options:
+        - Phase 0 — Foundation
+        - Phase 1 — Auth & Workspace Core
+        - Phase 2 — Real-time Messaging
+        - Phase 3 — Block Kit & Integrations
+        - Phase 4 — Interactive Apps
+        - Phase 5 — Voice & Video
+        - Phase 6 — Enterprise
+        - Phase 7 — Federation
+        - Phase 8 — Hardening & Scale
+        - Not sure

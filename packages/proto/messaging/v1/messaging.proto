@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package relay.messaging.v1;
+
+option go_package = "github.com/relay-gg/relay/packages/proto/gen/messaging/v1;messagingv1";
+
+// MessagingService provides internal message publication used by the Federation Service
+// to inject inbound messages from remote servers into the local message bus.
+service MessagingService {
+  // PublishInbound delivers a message received from a remote federated server
+  // as if it were a local message, triggering NATS fan-out to local WebSocket clients.
+  rpc PublishInbound(PublishInboundRequest) returns (PublishInboundResponse);
+}
+
+message PublishInboundRequest {
+  int64  channel_id    = 1;
+  int64  author_id     = 2; // local shadow federated_user ID
+  string content       = 3;
+  bytes  blocks        = 4; // optional Block Kit JSON
+  string source_server = 5; // originating server domain
+}
+
+message PublishInboundResponse {
+  int64 message_id = 1; // locally assigned Snowflake ID
+}

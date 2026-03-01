@@ -1,0 +1,53 @@
+# Research & design scratch files (not part of the repo)
+.scratch/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Go
+bin/
+dist/
+*.exe
+*.test
+*.out
+vendor/
+coverage.out
+coverage.html
+
+# Flutter / Dart
+apps/flutter/.dart_tool/
+apps/flutter/.flutter-plugins
+apps/flutter/.flutter-plugins-dependencies
+apps/flutter/build/
+apps/flutter/.packages
+apps/flutter/pubspec.lock
+**/.dart_tool/
+**/build/
+
+# Docker
+infra/docker/data/
+*.log
+
+# Secrets
+*.pem
+*.key
+*.p12
+*.pfx
+id_rsa
+id_ed25519
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Meilisearch data
+meili_data/
+
+# MinIO data
+minio_data/

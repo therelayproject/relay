@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package relay.auth.v1;
+
+option go_package = "github.com/relay-gg/relay/packages/proto/gen/auth/v1;authv1";
+
+// AuthService provides internal token validation used by other services.
+// External auth (login, register, refresh) is handled via REST in the Auth HTTP service.
+service AuthService {
+  // ValidateToken validates a raw JWT string and returns the associated claims.
+  // Called by the Messaging Service during WebSocket upgrades, where HTTP middleware
+  // cannot run before the connection is upgraded.
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+
+  // RevokeToken invalidates a token immediately (e.g. on logout or security event).
+  rpc RevokeToken(RevokeTokenRequest) returns (RevokeTokenResponse);
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
+  int64 user_id = 2;
+  int64 workspace_id = 3;
+  string role = 4; // owner | admin | member | guest
+}
+
+message RevokeTokenRequest {
+  string token = 1;
+}
+
+message RevokeTokenResponse {
+  bool revoked = 1;
+}

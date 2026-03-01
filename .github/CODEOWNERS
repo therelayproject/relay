@@ -1,0 +1,10 @@
+# Global owner — all PRs require review from a maintainer
+* @relay-gg/maintainers
+
+# Service-specific owners (add as the team grows)
+/services/auth/        @relay-gg/maintainers
+/services/api/         @relay-gg/maintainers
+/services/messaging/   @relay-gg/maintainers
+/services/federation/  @relay-gg/maintainers
+/apps/flutter/         @relay-gg/maintainers
+/infra/                @relay-gg/maintainers

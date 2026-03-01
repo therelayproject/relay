@@ -1,0 +1,49 @@
+name: Good First Issue
+description: A well-scoped task for new contributors
+labels: ["good first issue", "help wanted"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for contributing to Relay! This issue is designed to be completable
+        in under 4 hours with no prior knowledge of the codebase.
+
+  - type: textarea
+    id: task
+    attributes:
+      label: Task
+      description: What needs to be done?
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Background information and links to relevant files
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: How do we know it's done?
+      value: |
+        - [ ]
+        - [ ] Tests pass (`make test`)
+        - [ ] Linter passes (`make lint`)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Backend (Go)
+        - Frontend (Flutter)
+        - Infrastructure
+        - Documentation
+    validations:
+      required: true
