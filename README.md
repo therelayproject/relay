@@ -6,7 +6,7 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![CI](https://github.com/therelayproject/relay/actions/workflows/ci.yml/badge.svg)](https://github.com/therelayproject/relay/actions)
-[![Discord](https://img.shields.io/discord/000000000?label=Discord&logo=discord)](https://discord.gg/relay-gg)
+[![Discord](https://img.shields.io/discord/000000000?label=Discord&logo=discord)](https://discord.gg/StuvkbES)
 
 ---
 
