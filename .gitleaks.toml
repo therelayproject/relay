@@ -1,0 +1,32 @@
+title = "Relay gitleaks config"
+
+[extend]
+# Extend the default gitleaks ruleset.
+useDefault = true
+
+[allowlist]
+description = "Allowlist for known safe patterns in Relay"
+# Ignore test files — test secrets are intentional and clearly scoped.
+paths = [
+  '''.*_test\.go''',
+]
+# Ignore placeholder values used in example configs and K8s templates.
+regexes = [
+  '''change-me-in-production''',
+  '''CHANGE_ME''',
+  '''relay_dev''',
+  '''relay_minio''',
+  '''relay_minio_secret''',
+]
+
+[[rules]]
+id          = "generic-jwt-secret"
+description = "JWT secret assigned directly in source"
+regex       = '''(?i)jwt[_\-]?secret\s*[:=]\s*["'][^"']{8,}["']'''
+tags        = ["jwt", "secret"]
+
+[[rules]]
+id          = "minio-credentials"
+description = "MinIO access key or secret assigned directly in source"
+regex       = '''(?i)minio[_\-]?(access[_\-]?key|secret[_\-]?key|root[_\-]?user|root[_\-]?password)\s*[:=]\s*["'][^"']{4,}["']'''
+tags        = ["minio", "secret"]

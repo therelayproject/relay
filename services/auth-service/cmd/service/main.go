@@ -116,8 +116,7 @@ func main() {
 	// ── Services ──────────────────────────────────────────────────────────────
 	jwtSecret := cfg.JWTSecret
 	if jwtSecret == "" {
-		log.Warn().Msg("JWT_SECRET not set — using insecure placeholder; do NOT use in production")
-		jwtSecret = "change-me-in-production"
+		log.Fatal().Msg("JWT_SECRET is required and must not be empty")
 	}
 
 	accessTTL := time.Duration(cfg.JWTAccessTokenTTL) * time.Second

@@ -53,8 +53,7 @@ func main() {
 
 	jwtSecret := cfg.JWTSecret
 	if jwtSecret == "" {
-		log.Warn().Msg("JWT_SECRET not set — using insecure placeholder")
-		jwtSecret = "change-me-in-production"
+		log.Fatal().Msg("JWT_SECRET is required and must not be empty")
 	}
 
 	presenceSvc := service.NewPresenceService(rdb, nc)
