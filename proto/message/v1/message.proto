@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package message.v1;
+
+option go_package = "github.com/relay-im/relay/shared/proto/gen/message/v1;messagev1";
+
+service MessageService {
+  rpc SendMessage(SendMessageRequest) returns (SendMessageResponse);
+  rpc GetMessage(GetMessageRequest) returns (GetMessageResponse);
+  rpc DeleteMessage(DeleteMessageRequest) returns (DeleteMessageResponse);
+  rpc AddReaction(AddReactionRequest) returns (AddReactionResponse);
+}
+
+message Message {
+  string id          = 1;
+  string channel_id  = 2;
+  string sender_id   = 3;
+  string body        = 4;
+  string thread_id   = 5; // empty for top-level messages
+  int64  created_at  = 6;
+  int64  updated_at  = 7;
+  bool   deleted     = 8;
+}
+
+message SendMessageRequest {
+  string channel_id = 1;
+  string sender_id  = 2;
+  string body       = 3;
+  string thread_id  = 4;
+}
+
+message SendMessageResponse {
+  Message message = 1;
+}
+
+message GetMessageRequest {
+  string message_id = 1;
+}
+
+message GetMessageResponse {
+  Message message = 1;
+}
+
+message DeleteMessageRequest {
+  string message_id = 1;
+  string actor_id   = 2;
+}
+
+message DeleteMessageResponse {}
+
+message AddReactionRequest {
+  string message_id = 1;
+  string user_id    = 2;
+  string emoji      = 3;
+}
+
+message AddReactionResponse {}

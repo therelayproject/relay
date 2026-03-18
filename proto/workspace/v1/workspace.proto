@@ -1,0 +1,55 @@
+syntax = "proto3";
+
+package workspace.v1;
+
+option go_package = "github.com/relay-im/relay/shared/proto/gen/workspace/v1;workspacev1";
+
+service WorkspaceService {
+  rpc CreateWorkspace(CreateWorkspaceRequest) returns (CreateWorkspaceResponse);
+  rpc GetWorkspace(GetWorkspaceRequest) returns (GetWorkspaceResponse);
+  rpc InviteMember(InviteMemberRequest) returns (InviteMemberResponse);
+  rpc RemoveMember(RemoveMemberRequest) returns (RemoveMemberResponse);
+}
+
+message Workspace {
+  string id         = 1;
+  string name       = 2;
+  string slug       = 3;
+  string owner_id   = 4;
+  int64  created_at = 5;
+}
+
+message CreateWorkspaceRequest {
+  string name     = 1;
+  string slug     = 2;
+  string owner_id = 3;
+}
+
+message CreateWorkspaceResponse {
+  Workspace workspace = 1;
+}
+
+message GetWorkspaceRequest {
+  string workspace_id = 1;
+}
+
+message GetWorkspaceResponse {
+  Workspace workspace = 1;
+}
+
+message InviteMemberRequest {
+  string workspace_id = 1;
+  string email        = 2;
+  string role         = 3;
+}
+
+message InviteMemberResponse {
+  string invite_token = 1;
+}
+
+message RemoveMemberRequest {
+  string workspace_id = 1;
+  string user_id      = 2;
+}
+
+message RemoveMemberResponse {}

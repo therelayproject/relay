@@ -1,0 +1,15 @@
+go 1.22
+
+use (
+	./shared
+	./services/auth-service
+	./services/user-service
+	./services/workspace-service
+	./services/channel-service
+	./services/message-service
+	./services/ws-gateway
+	./services/presence-service
+	./services/notification-service
+	./services/search-service
+	./services/file-service
+)

@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package presence.v1;
+
+option go_package = "github.com/relay-im/relay/shared/proto/gen/presence/v1;presencev1";
+
+service PresenceService {
+  rpc Heartbeat(HeartbeatRequest) returns (HeartbeatResponse);
+  rpc GetPresence(GetPresenceRequest) returns (GetPresenceResponse);
+  rpc GetBulkPresence(GetBulkPresenceRequest) returns (GetBulkPresenceResponse);
+}
+
+enum PresenceStatus {
+  PRESENCE_STATUS_UNSPECIFIED = 0;
+  PRESENCE_STATUS_ONLINE      = 1;
+  PRESENCE_STATUS_AWAY        = 2;
+  PRESENCE_STATUS_DND         = 3;
+  PRESENCE_STATUS_OFFLINE     = 4;
+}
+
+message Presence {
+  string         user_id    = 1;
+  PresenceStatus status     = 2;
+  int64          last_seen  = 3;
+}
+
+message HeartbeatRequest {
+  string user_id    = 1;
+  string session_id = 2;
+}
+
+message HeartbeatResponse {}
+
+message GetPresenceRequest {
+  string user_id = 1;
+}
+
+message GetPresenceResponse {
+  Presence presence = 1;
+}
+
+message GetBulkPresenceRequest {
+  repeated string user_ids = 1;
+}
+
+message GetBulkPresenceResponse {
+  repeated Presence presences = 1;
+}
