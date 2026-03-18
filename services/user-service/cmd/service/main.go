@@ -18,6 +18,7 @@ import (
 	"github.com/relay-im/relay/shared/config"
 	"github.com/relay-im/relay/shared/db"
 	"github.com/relay-im/relay/shared/logger"
+	"github.com/relay-im/relay/shared/middleware"
 	userv1 "github.com/relay-im/relay/shared/proto/gen/user/v1"
 	"google.golang.org/grpc"
 )
@@ -116,7 +117,7 @@ func main() {
 	httpAddr := fmt.Sprintf(":%d", cfg.HTTPPort)
 	httpSrv := &http.Server{
 		Addr:         httpAddr,
-		Handler:      httpRouter,
+		Handler:      middleware.CORS(middleware.ParseCORSOrigins(cfg.CORSAllowedOrigins))(httpRouter),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,

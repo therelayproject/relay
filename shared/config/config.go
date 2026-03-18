@@ -33,6 +33,12 @@ type BaseConfig struct {
 	JWTSecret          string `mapstructure:"JWT_SECRET"`
 	JWTAccessTokenTTL  int    `mapstructure:"JWT_ACCESS_TTL_SECONDS"`
 	JWTRefreshTokenTTL int    `mapstructure:"JWT_REFRESH_TTL_SECONDS"`
+
+	// CORS — comma-separated list of allowed origins, e.g.
+	// "http://localhost:3000,https://app.relay.im".
+	// Set to "*" to allow all origins (development only).
+	// Leave empty to disable CORS headers entirely (production default).
+	CORSAllowedOrigins string `mapstructure:"CORS_ALLOWED_ORIGINS"`
 }
 
 // Load reads configuration from environment variables (and optionally .env).

@@ -106,7 +106,7 @@ func main() {
 	addr := fmt.Sprintf(":%d", httpPort(cfg.HTTPPort))
 	srv := &http.Server{
 		Addr:         addr,
-		Handler:      requestLogger(log, mux),
+		Handler:      middleware.CORS(middleware.ParseCORSOrigins(cfg.CORSAllowedOrigins))(requestLogger(log, mux)),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,

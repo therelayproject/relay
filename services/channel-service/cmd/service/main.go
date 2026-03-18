@@ -16,6 +16,7 @@ import (
 	"github.com/relay-im/relay/shared/config"
 	"github.com/relay-im/relay/shared/db"
 	"github.com/relay-im/relay/shared/logger"
+	"github.com/relay-im/relay/shared/middleware"
 )
 
 func main() {
@@ -85,7 +86,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", httpPort),
-		Handler:      router,
+		Handler:      middleware.CORS(middleware.ParseCORSOrigins(cfg.CORSAllowedOrigins))(router),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,

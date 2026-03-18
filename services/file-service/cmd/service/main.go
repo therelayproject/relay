@@ -133,7 +133,7 @@ func main() {
 	addr := fmt.Sprintf(":%d", cfg.HTTPPort)
 	srv := &http.Server{
 		Addr:         addr,
-		Handler:      httpHandler,
+		Handler:      middleware.CORS(middleware.ParseCORSOrigins(cfg.CORSAllowedOrigins))(httpHandler),
 		ReadTimeout:  60 * time.Second, // longer for large uploads
 		WriteTimeout: 60 * time.Second,
 		IdleTimeout:  60 * time.Second,

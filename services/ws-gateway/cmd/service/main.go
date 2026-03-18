@@ -97,7 +97,7 @@ func main() {
 	addr := fmt.Sprintf(":%d", cfg.HTTPPort)
 	srv := &http.Server{
 		Addr:    addr,
-		Handler: httpHandler,
+		Handler: middleware.CORS(middleware.ParseCORSOrigins(cfg.CORSAllowedOrigins))(httpHandler),
 		// WebSocket connections are long-lived; only set read/write deadlines at
 		// the per-message level inside WritePump/ReadPump.
 		ReadHeaderTimeout: 10 * time.Second,

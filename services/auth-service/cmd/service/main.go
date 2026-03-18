@@ -220,9 +220,11 @@ func main() {
 	mux.Handle("POST /api/v1/auth/mfa/setup", authMW(http.HandlerFunc(authHandler.SetupMFA)))
 	mux.Handle("POST /api/v1/auth/mfa/verify", authMW(http.HandlerFunc(authHandler.VerifyMFA)))
 
-	// Outer middleware chain: RequestID → Logger → mux.
-	httpHandler := middleware.RequestID(
-		middleware.Logger(log)(mux),
+	// Outer middleware chain: CORS → RequestID → Logger → mux.
+	httpHandler := middleware.CORS(middleware.ParseCORSOrigins(cfg.CORSAllowedOrigins))(
+		middleware.RequestID(
+			middleware.Logger(log)(mux),
+		),
 	)
 
 	httpAddr := fmt.Sprintf(":%d", cfg.HTTPPort)

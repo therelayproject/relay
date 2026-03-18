@@ -14,6 +14,7 @@ import (
 	"github.com/relay-im/relay/services/search-service/internal/service"
 	"github.com/relay-im/relay/shared/config"
 	"github.com/relay-im/relay/shared/logger"
+	"github.com/relay-im/relay/shared/middleware"
 )
 
 // ServiceConfig extends BaseConfig with search-service–specific fields.
@@ -74,7 +75,7 @@ func main() {
 	addr := fmt.Sprintf(":%d", cfg.HTTPPort)
 	srv := &http.Server{
 		Addr:         addr,
-		Handler:      httpHandler,
+		Handler:      middleware.CORS(middleware.ParseCORSOrigins(cfg.CORSAllowedOrigins))(httpHandler),
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 15 * time.Second,
 		IdleTimeout:  60 * time.Second,
