@@ -3,7 +3,6 @@ package service
 
 import (
 	"context"
-	"fmt"
 	"strings"
 	"time"
 
@@ -121,28 +120,6 @@ type StorageService interface {
 	UploadAvatar(ctx context.Context, userID string, data []byte, contentType string) (publicURL string, err error)
 }
 
-// NoopStorageService is a stub StorageService that generates a placeholder
-// MinIO-style URL without performing a real object-store upload.
-// Replace with a real implementation when MinIO credentials are available.
-type NoopStorageService struct {
-	Endpoint string // e.g. "http://localhost:9000"
-	Bucket   string // e.g. "relay-media"
-}
-
-// UploadAvatar returns a deterministic placeholder URL for the given user.
-func (n *NoopStorageService) UploadAvatar(_ context.Context, userID string, _ []byte, _ string) (string, error) {
-	endpoint := n.Endpoint
-	if endpoint == "" {
-		endpoint = "http://localhost:9000"
-	}
-	bucket := n.Bucket
-	if bucket == "" {
-		bucket = "relay-media"
-	}
-	return fmt.Sprintf("%s/%s/avatars/%s.jpg", endpoint, bucket, userID), nil
-}
-
-// minioClientIface abstracts the MinIO client for testability.
-type minioClientIface interface {
-	PutObject(ctx context.Context, bucket, object string, data []byte, contentType string) error
-}
+// NoopStorageService is an alias for NoopStorage kept for backward compatibility.
+// Prefer NoopStorage directly for new code.
+type NoopStorageService = NoopStorage
