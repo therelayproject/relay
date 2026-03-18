@@ -1,0 +1,184 @@
+---
+# auth-service: 1 replica, low resource limits, debug logging
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: relay
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: auth-service
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: LOG_LEVEL
+              value: "debug"
+---
+# user-service: 1 replica, low resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: relay
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: user-service
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: LOG_LEVEL
+              value: "debug"
+---
+# workspace-service: 1 replica, low resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workspace-service
+  namespace: relay
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: workspace-service
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: LOG_LEVEL
+              value: "debug"
+---
+# channel-service: 1 replica, low resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: channel-service
+  namespace: relay
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: channel-service
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: LOG_LEVEL
+              value: "debug"
+---
+# message-service: 1 replica, low resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-service
+  namespace: relay
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: message-service
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: LOG_LEVEL
+              value: "debug"
+---
+# ws-gateway: 1 replica, low resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ws-gateway
+  namespace: relay
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: ws-gateway
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: LOG_LEVEL
+              value: "debug"
+---
+# presence-service: 1 replica, low resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: presence-service
+  namespace: relay
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: presence-service
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: LOG_LEVEL
+              value: "debug"
+---
+# file-service: 1 replica, low resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-service
+  namespace: relay
+spec:
+  replicas: 1
+  template:
+    spec:
+      containers:
+        - name: file-service
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "250m"
+              memory: "256Mi"
+          env:
+            - name: LOG_LEVEL
+              value: "debug"

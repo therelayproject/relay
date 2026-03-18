@@ -1,0 +1,110 @@
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: auth-service
+  namespace: relay
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: auth-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: user-service
+  namespace: relay
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: user-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: workspace-service
+  namespace: relay
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: workspace-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: channel-service
+  namespace: relay
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: channel-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: message-service
+  namespace: relay
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: message-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ws-gateway
+  namespace: relay
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: ws-gateway
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: presence-service
+  namespace: relay
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: presence-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: notification-service
+  namespace: relay
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: notification-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: search-service
+  namespace: relay
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: search-service
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: file-service
+  namespace: relay
+spec:
+  minAvailable: 2
+  selector:
+    matchLabels:
+      app: file-service

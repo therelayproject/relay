@@ -1,0 +1,160 @@
+---
+# auth-service: 3 replicas (critical), high resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-service
+  namespace: relay
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: auth-service
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+---
+# user-service: 2 replicas, high resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-service
+  namespace: relay
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: user-service
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+---
+# workspace-service: 2 replicas, high resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: workspace-service
+  namespace: relay
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: workspace-service
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+---
+# channel-service: 2 replicas, high resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: channel-service
+  namespace: relay
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: channel-service
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+---
+# message-service: 3 replicas (critical), high resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-service
+  namespace: relay
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: message-service
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+---
+# ws-gateway: 3 replicas (critical), high resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ws-gateway
+  namespace: relay
+spec:
+  replicas: 3
+  template:
+    spec:
+      containers:
+        - name: ws-gateway
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+---
+# presence-service: 2 replicas, high resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: presence-service
+  namespace: relay
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: presence-service
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"
+---
+# file-service: 2 replicas, high resource limits
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: file-service
+  namespace: relay
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+        - name: file-service
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "1000m"
+              memory: "1Gi"

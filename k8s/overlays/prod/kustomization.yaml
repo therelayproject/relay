@@ -1,0 +1,31 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: relay
+
+resources:
+  - ../../base
+  - pdb.yaml
+  - hpa.yaml
+
+patches:
+  - path: deployment-patches.yaml
+  - path: configmap-patch.yaml
+
+images:
+  - name: relay/auth-service
+    newTag: prod
+  - name: relay/user-service
+    newTag: prod
+  - name: relay/workspace-service
+    newTag: prod
+  - name: relay/channel-service
+    newTag: prod
+  - name: relay/message-service
+    newTag: prod
+  - name: relay/ws-gateway
+    newTag: prod
+  - name: relay/presence-service
+    newTag: prod
+  - name: relay/file-service
+    newTag: prod
