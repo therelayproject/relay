@@ -11,12 +11,14 @@ import (
 
 	"github.com/minio/minio-go/v7"
 	"github.com/minio/minio-go/v7/pkg/credentials"
+	"github.com/redis/go-redis/v9"
 	"github.com/relay-im/relay/services/file-service/internal/handler"
 	"github.com/relay-im/relay/services/file-service/internal/repository"
 	"github.com/relay-im/relay/services/file-service/internal/service"
 	"github.com/relay-im/relay/shared/config"
 	"github.com/relay-im/relay/shared/db"
 	"github.com/relay-im/relay/shared/logger"
+	"github.com/relay-im/relay/shared/middleware"
 )
 
 // ServiceConfig extends BaseConfig with file-service–specific fields.
@@ -26,6 +28,12 @@ type ServiceConfig struct {
 	MinioAccessKey    string `mapstructure:"MINIO_ACCESS_KEY"`
 	MinioSecretKey    string `mapstructure:"MINIO_SECRET_KEY"`
 	MinioUseSSL       bool   `mapstructure:"MINIO_USE_SSL"`
+
+	// Rate limiting for file upload endpoint.
+	// RATE_LIMIT_UPLOAD_LIMIT:          max uploads per window (default 20).
+	// RATE_LIMIT_UPLOAD_WINDOW_SECONDS: window size in seconds  (default 60).
+	RateLimitUploadLimit         int `mapstructure:"RATE_LIMIT_UPLOAD_LIMIT"`
+	RateLimitUploadWindowSeconds int `mapstructure:"RATE_LIMIT_UPLOAD_WINDOW_SECONDS"`
 }
 
 func main() {
@@ -47,6 +55,12 @@ func main() {
 	if cfg.MinioSecretKey == "" {
 		fmt.Fprintln(os.Stderr, "fatal: MINIO_SECRET_KEY is required")
 		os.Exit(1)
+	}
+	if cfg.RateLimitUploadLimit == 0 {
+		cfg.RateLimitUploadLimit = 20
+	}
+	if cfg.RateLimitUploadWindowSeconds == 0 {
+		cfg.RateLimitUploadWindowSeconds = 60
 	}
 
 	log := logger.Init(logger.Config{
@@ -83,6 +97,29 @@ func main() {
 	}
 	log.Info().Str("endpoint", cfg.MinioEndpoint).Msg("minio connected")
 
+	// ── Redis ─────────────────────────────────────────────────────────────────
+	rdbOpts, err := redis.ParseURL(cfg.RedisURL)
+	if err != nil {
+		log.Fatal().Err(err).Str("url", cfg.RedisURL).Msg("invalid redis URL")
+	}
+	rdb := redis.NewClient(rdbOpts)
+	defer rdb.Close()
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		log.Fatal().Err(err).Msg("redis ping failed")
+	}
+	log.Info().Msg("redis connected")
+
+	uploadRateLimit := middleware.RateLimitRedis(
+		rdb,
+		"file:upload",
+		cfg.RateLimitUploadLimit,
+		time.Duration(cfg.RateLimitUploadWindowSeconds)*time.Second,
+	)
+	log.Info().
+		Int("limit", cfg.RateLimitUploadLimit).
+		Int("window_seconds", cfg.RateLimitUploadWindowSeconds).
+		Msg("file upload rate limiting configured")
+
 	jwtSecret := cfg.JWTSecret
 	if jwtSecret == "" {
 		log.Fatal().Msg("JWT_SECRET is required and must not be empty")
@@ -91,7 +128,7 @@ func main() {
 	fileRepo := repository.New(pool)
 	fileSvc := service.New(fileRepo, mc, log)
 	fileHandler := handler.NewFileHandler(fileSvc)
-	httpHandler := handler.NewRouter(fileHandler, jwtSecret, log)
+	httpHandler := handler.NewRouter(fileHandler, jwtSecret, log, uploadRateLimit)
 
 	addr := fmt.Sprintf(":%d", cfg.HTTPPort)
 	srv := &http.Server{

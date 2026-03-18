@@ -8,6 +8,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0
 	github.com/nats-io/nats.go v1.34.1
+	github.com/redis/go-redis/v9 v9.5.1
 	github.com/rs/zerolog v1.32.0
 )
 
@@ -16,7 +17,6 @@ require (
 	github.com/klauspost/compress v1.17.7 // indirect
 	github.com/nats-io/nkeys v0.4.7 // indirect
 	github.com/nats-io/nuid v1.0.1 // indirect
-	github.com/redis/go-redis/v9 v9.5.1 // indirect
 	github.com/spf13/viper v1.18.2 // indirect
 	golang.org/x/sys v0.19.0 // indirect
 	google.golang.org/grpc v1.63.2 // indirect

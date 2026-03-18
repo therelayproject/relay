@@ -9,7 +9,9 @@ import (
 )
 
 // NewRouter wires ws-gateway routes.
-func NewRouter(h *GatewayHandler, log zerolog.Logger) http.Handler {
+// connectMiddlewares are applied (innermost-first) to the WebSocket connect
+// endpoint only (e.g. rate limiting).
+func NewRouter(h *GatewayHandler, log zerolog.Logger, connectMiddlewares ...func(http.Handler) http.Handler) http.Handler {
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /healthz", func(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +21,12 @@ func NewRouter(h *GatewayHandler, log zerolog.Logger) http.Handler {
 	})
 
 	// WebSocket endpoint — token auth happens inside the handler.
-	mux.HandleFunc("GET /gateway/connect", h.Connect)
+	// Wrap with any provided per-endpoint middlewares (e.g. rate limiter).
+	var connectHandler http.Handler = http.HandlerFunc(h.Connect)
+	for i := len(connectMiddlewares) - 1; i >= 0; i-- {
+		connectHandler = connectMiddlewares[i](connectHandler)
+	}
+	mux.Handle("GET /gateway/connect", connectHandler)
 
 	return middleware.RequestID(middleware.Logger(log)(mux))
 }

@@ -10,20 +10,39 @@ import (
 	"time"
 
 	nats "github.com/nats-io/nats.go"
+	"github.com/redis/go-redis/v9"
 	"github.com/relay-im/relay/services/ws-gateway/internal/handler"
 	"github.com/relay-im/relay/services/ws-gateway/internal/hub"
 	"github.com/relay-im/relay/shared/config"
 	"github.com/relay-im/relay/shared/logger"
+	"github.com/relay-im/relay/shared/middleware"
 )
 
+// GatewayConfig extends BaseConfig with ws-gateway-specific settings.
+type GatewayConfig struct {
+	config.BaseConfig `mapstructure:",squash"`
+
+	// Rate limiting for WebSocket connection upgrades.
+	// RATE_LIMIT_WS_LIMIT:          max connections per window (default 30).
+	// RATE_LIMIT_WS_WINDOW_SECONDS: window size in seconds     (default 60).
+	RateLimitWSLimit         int `mapstructure:"RATE_LIMIT_WS_LIMIT"`
+	RateLimitWSWindowSeconds int `mapstructure:"RATE_LIMIT_WS_WINDOW_SECONDS"`
+}
+
 func main() {
-	cfg, err := config.Load[config.BaseConfig]("")
+	cfg, err := config.Load[GatewayConfig]("")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "fatal: load config: %v\n", err)
 		os.Exit(1)
 	}
 	if cfg.HTTPPort == 0 {
 		cfg.HTTPPort = 8006
+	}
+	if cfg.RateLimitWSLimit == 0 {
+		cfg.RateLimitWSLimit = 30
+	}
+	if cfg.RateLimitWSWindowSeconds == 0 {
+		cfg.RateLimitWSWindowSeconds = 60
 	}
 
 	log := logger.Init(logger.Config{
@@ -39,6 +58,29 @@ func main() {
 	defer nc.Drain() //nolint:errcheck
 	log.Info().Msg("nats connected")
 
+	// ── Redis ─────────────────────────────────────────────────────────────────
+	rdbOpts, err := redis.ParseURL(cfg.RedisURL)
+	if err != nil {
+		log.Fatal().Err(err).Str("url", cfg.RedisURL).Msg("invalid redis URL")
+	}
+	rdb := redis.NewClient(rdbOpts)
+	defer rdb.Close()
+	if err := rdb.Ping(context.Background()).Err(); err != nil {
+		log.Fatal().Err(err).Msg("redis ping failed")
+	}
+	log.Info().Msg("redis connected")
+
+	wsRateLimit := middleware.RateLimitRedis(
+		rdb,
+		"ws:connect",
+		cfg.RateLimitWSLimit,
+		time.Duration(cfg.RateLimitWSWindowSeconds)*time.Second,
+	)
+	log.Info().
+		Int("limit", cfg.RateLimitWSLimit).
+		Int("window_seconds", cfg.RateLimitWSWindowSeconds).
+		Msg("ws-gateway rate limiting configured")
+
 	jwtSecret := cfg.JWTSecret
 	if jwtSecret == "" {
 		log.Fatal().Msg("JWT_SECRET is required and must not be empty")
@@ -50,7 +92,7 @@ func main() {
 	go h.Run(ctx)
 
 	gwHandler := handler.NewGatewayHandler(h, jwtSecret, log)
-	httpHandler := handler.NewRouter(gwHandler, log)
+	httpHandler := handler.NewRouter(gwHandler, log, wsRateLimit)
 
 	addr := fmt.Sprintf(":%d", cfg.HTTPPort)
 	srv := &http.Server{

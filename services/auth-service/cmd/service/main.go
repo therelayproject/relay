@@ -49,6 +49,12 @@ type AuthConfig struct {
 	GoogleClientSecret string `mapstructure:"GOOGLE_CLIENT_SECRET"`
 	GitHubClientID     string `mapstructure:"GITHUB_CLIENT_ID"`
 	GitHubClientSecret string `mapstructure:"GITHUB_CLIENT_SECRET"`
+
+	// Rate limiting for sensitive public endpoints (login / register).
+	// RATE_LIMIT_AUTH_LIMIT:          max requests per window (default 10).
+	// RATE_LIMIT_AUTH_WINDOW_SECONDS: window size in seconds    (default 60).
+	RateLimitAuthLimit         int `mapstructure:"RATE_LIMIT_AUTH_LIMIT"`
+	RateLimitAuthWindowSeconds int `mapstructure:"RATE_LIMIT_AUTH_WINDOW_SECONDS"`
 }
 
 func main() {
@@ -164,6 +170,24 @@ func main() {
 		jwtSvc, oauthSvc, mailer, rdb,
 	)
 
+	// ── Rate limit defaults ───────────────────────────────────────────────────
+	if cfg.RateLimitAuthLimit == 0 {
+		cfg.RateLimitAuthLimit = 10
+	}
+	if cfg.RateLimitAuthWindowSeconds == 0 {
+		cfg.RateLimitAuthWindowSeconds = 60
+	}
+	authRateLimit := middleware.RateLimitRedis(
+		rdb,
+		"auth",
+		cfg.RateLimitAuthLimit,
+		time.Duration(cfg.RateLimitAuthWindowSeconds)*time.Second,
+	)
+	log.Info().
+		Int("limit", cfg.RateLimitAuthLimit).
+		Int("window_seconds", cfg.RateLimitAuthWindowSeconds).
+		Msg("auth rate limiting configured")
+
 	// ── HTTP routes ───────────────────────────────────────────────────────────
 	authHandler := handler.NewAuthHandler(authSvc, oauthSvc)
 	authMW := middleware.Auth(jwtSecret)
@@ -177,9 +201,11 @@ func main() {
 		_, _ = w.Write([]byte(`{"status":"ok","service":"auth-service"}`))
 	})
 
-	// Public endpoints.
-	mux.HandleFunc("POST /api/v1/auth/register", authHandler.Register)
-	mux.HandleFunc("POST /api/v1/auth/login", authHandler.Login)
+	// Sensitive public endpoints — Redis-backed rate limit applied per-route.
+	mux.Handle("POST /api/v1/auth/register", authRateLimit(http.HandlerFunc(authHandler.Register)))
+	mux.Handle("POST /api/v1/auth/login", authRateLimit(http.HandlerFunc(authHandler.Login)))
+
+	// Other public endpoints.
 	mux.HandleFunc("POST /api/v1/auth/logout", authHandler.Logout)
 	mux.HandleFunc("POST /api/v1/auth/refresh", authHandler.Refresh)
 	mux.HandleFunc("GET /api/v1/auth/oauth/{provider}", authHandler.OAuthRedirect)
@@ -194,11 +220,9 @@ func main() {
 	mux.Handle("POST /api/v1/auth/mfa/setup", authMW(http.HandlerFunc(authHandler.SetupMFA)))
 	mux.Handle("POST /api/v1/auth/mfa/verify", authMW(http.HandlerFunc(authHandler.VerifyMFA)))
 
-	// Outer middleware chain: RequestID → Logger → RateLimit → mux.
+	// Outer middleware chain: RequestID → Logger → mux.
 	httpHandler := middleware.RequestID(
-		middleware.Logger(log)(
-			middleware.RateLimit(100, 200)(mux),
-		),
+		middleware.Logger(log)(mux),
 	)
 
 	httpAddr := fmt.Sprintf(":%d", cfg.HTTPPort)
