@@ -14,9 +14,22 @@ import (
 	apperrors "github.com/relay-im/relay/shared/errors"
 )
 
+// ChannelRepository describes the persistence operations the channel service needs.
+type ChannelRepository interface {
+	Create(ctx context.Context, workspaceID, name, slug, description, channelType, createdBy string) (*domain.Channel, error)
+	GetByID(ctx context.Context, id string) (*domain.Channel, error)
+	ListByWorkspace(ctx context.Context, workspaceID string, includePublic bool, requesterID string) ([]domain.Channel, error)
+	Update(ctx context.Context, id, name, description, topic string) (*domain.Channel, error)
+	Archive(ctx context.Context, id string) error
+	AddMember(ctx context.Context, channelID, userID, role string) (*domain.ChannelMember, error)
+	RemoveMember(ctx context.Context, channelID, userID string) error
+	GetMember(ctx context.Context, channelID, userID string) (*domain.ChannelMember, error)
+	ListMembers(ctx context.Context, channelID string) ([]domain.ChannelMember, error)
+}
+
 // ChannelService implements channel business logic.
 type ChannelService struct {
-	repo *repository.ChannelRepo
+	repo ChannelRepository
 	nc   *nats.Conn // may be nil; NATS events are best-effort
 	log  zerolog.Logger
 }

@@ -26,9 +26,25 @@ type memberJoinedEvent struct {
 	JoinedAt    time.Time `json:"joined_at"`
 }
 
+// WorkspaceRepository describes the persistence operations the workspace service needs.
+type WorkspaceRepository interface {
+	Create(ctx context.Context, name, slug, description, ownerID string) (*domain.Workspace, error)
+	GetByID(ctx context.Context, id string) (*domain.Workspace, error)
+	Update(ctx context.Context, id, name, description, iconURL string) (*domain.Workspace, error)
+	ListByMember(ctx context.Context, userID string) ([]domain.Workspace, error)
+	AddMember(ctx context.Context, workspaceID, userID, role, invitedBy string) (*domain.WorkspaceMember, error)
+	GetMember(ctx context.Context, workspaceID, userID string) (*domain.WorkspaceMember, error)
+	UpdateMemberRole(ctx context.Context, workspaceID, userID, role string) error
+	RemoveMember(ctx context.Context, workspaceID, userID string) error
+	ListMembers(ctx context.Context, workspaceID string) ([]domain.WorkspaceMember, error)
+	CreateInvitation(ctx context.Context, inv *domain.WorkspaceInvitation) (*domain.WorkspaceInvitation, error)
+	GetInvitationByToken(ctx context.Context, token string) (*domain.WorkspaceInvitation, error)
+	AcceptInvitation(ctx context.Context, token string) error
+}
+
 // WorkspaceService orchestrates workspace operations and NATS event publishing.
 type WorkspaceService struct {
-	repo *repository.WorkspaceRepo
+	repo WorkspaceRepository
 	nc   *nats.Conn // may be nil when NATS is unavailable
 	log  zerolog.Logger
 }

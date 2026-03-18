@@ -15,9 +15,26 @@ import (
 	apperrors "github.com/relay-im/relay/shared/errors"
 )
 
+// MessageRepository describes the persistence operations the message service needs.
+type MessageRepository interface {
+	Create(ctx context.Context, m *domain.Message) (*domain.Message, error)
+	GetByID(ctx context.Context, id string) (*domain.Message, error)
+	ListByChannel(ctx context.Context, channelID string, limit int, cursor string) (*domain.Page, error)
+	ListThread(ctx context.Context, threadID string, limit int, cursor string) (*domain.Page, error)
+	Update(ctx context.Context, id, authorID, body string, bodyParsed json.RawMessage) (*domain.Message, error)
+	SoftDelete(ctx context.Context, id, authorID string) error
+	IncrementReplyCount(ctx context.Context, messageID string) error
+	AddReaction(ctx context.Context, rx *domain.Reaction) error
+	RemoveReaction(ctx context.Context, messageID, userID, emoji string) error
+	ListReactions(ctx context.Context, messageID string) ([]domain.ReactionSummary, error)
+	PinMessage(ctx context.Context, pin *domain.Pin) error
+	UnpinMessage(ctx context.Context, channelID, messageID string) error
+	ListPins(ctx context.Context, channelID string) ([]*domain.Pin, error)
+}
+
 // MessageService orchestrates message operations and NATS event publishing.
 type MessageService struct {
-	repo *repository.MessageRepo
+	repo MessageRepository
 	nc   *nats.Conn
 }
 
