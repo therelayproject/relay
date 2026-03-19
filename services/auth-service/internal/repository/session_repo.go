@@ -23,14 +23,23 @@ func NewSessionRepo(db *pgxpool.Pool) *SessionRepo {
 
 // Create inserts a new session and returns it.
 func (r *SessionRepo) Create(ctx context.Context, userID, deviceName, userAgent, ip string) (*domain.Session, error) {
+	// ip_address is inet type — pass nil when empty to avoid casting "" to inet.
+	var ipParam any
+	if ip != "" {
+		ipParam = ip
+	}
 	var s domain.Session
+	var ipOut *string
 	err := r.db.QueryRow(ctx, `
 		INSERT INTO sessions (user_id, device_name, user_agent, ip_address)
 		VALUES ($1, $2, $3, $4::inet)
 		RETURNING id, user_id, device_name, user_agent, ip_address::text, last_seen_at, created_at
-	`, userID, deviceName, userAgent, ip).Scan(
-		&s.ID, &s.UserID, &s.DeviceName, &s.UserAgent, &s.IPAddress, &s.LastSeenAt, &s.CreatedAt,
+	`, userID, deviceName, userAgent, ipParam).Scan(
+		&s.ID, &s.UserID, &s.DeviceName, &s.UserAgent, &ipOut, &s.LastSeenAt, &s.CreatedAt,
 	)
+	if ipOut != nil {
+		s.IPAddress = *ipOut
+	}
 	if err != nil {
 		return nil, fmt.Errorf("session create: %w", err)
 	}
