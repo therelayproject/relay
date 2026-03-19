@@ -34,7 +34,6 @@ func (r *MessageRepo) Create(ctx context.Context, m *domain.Message) (*domain.Me
 		INSERT INTO relay_messages
 			(channel_id, author_id, body, body_parsed, thread_id, parent_id, idempotency_key)
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
-		ON CONFLICT (idempotency_key) DO UPDATE SET id = relay_messages.id
 		RETURNING id, channel_id, author_id, body, body_parsed,
 		          thread_id::text, parent_id::text, idempotency_key::text,
 		          is_edited, is_deleted, reply_count, created_at, updated_at
