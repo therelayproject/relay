@@ -37,7 +37,7 @@ func TestRegister_EmptyEmailOrPassword(t *testing.T) {
 		{"user@example.com", ""},
 	}
 	for _, c := range cases {
-		_, err := svc.Register(context.Background(), c.email, c.pass, "Alice")
+		_, _, err := svc.Register(context.Background(), c.email, c.pass, "Alice")
 		if err == nil {
 			t.Fatalf("Register(%q, %q): expected error, got nil", c.email, c.pass)
 		}
@@ -51,7 +51,7 @@ func TestRegister_EmptyEmailOrPassword(t *testing.T) {
 func TestRegister_PasswordTooShort(t *testing.T) {
 	svc := &AuthService{mailer: &mockMailer{}, jwt: newTestJWTService()}
 
-	_, err := svc.Register(context.Background(), "user@example.com", "short", "Alice")
+	_, _, err := svc.Register(context.Background(), "user@example.com", "short", "Alice")
 	if err == nil {
 		t.Fatal("expected error for short password, got nil")
 	}

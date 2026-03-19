@@ -54,34 +54,41 @@ func NewAuthService(
 	}
 }
 
-// Register creates a new user account and sends a verification email.
-func (s *AuthService) Register(ctx context.Context, email, password, displayName string) (*domain.User, error) {
+// Register creates a new user account, issues auth tokens, and sends a
+// verification email asynchronously. Email verification is not required to use
+// the account (dev/beta behaviour), so we auto-login immediately.
+func (s *AuthService) Register(ctx context.Context, email, password, displayName string) (*domain.TokenPair, *domain.User, error) {
 	if email == "" || password == "" {
-		return nil, apperrors.New(apperrors.CodeInvalidArgument, "email and password are required")
+		return nil, nil, apperrors.New(apperrors.CodeInvalidArgument, "email and password are required")
 	}
 	if len(password) < 8 {
-		return nil, apperrors.New(apperrors.CodeInvalidArgument, "password must be at least 8 characters")
+		return nil, nil, apperrors.New(apperrors.CodeInvalidArgument, "password must be at least 8 characters")
 	}
 
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcryptCost)
 	if err != nil {
-		return nil, fmt.Errorf("bcrypt: %w", err)
+		return nil, nil, fmt.Errorf("bcrypt: %w", err)
 	}
 
 	user, err := s.users.Create(ctx, email, string(hash))
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	// Issue email verification token and send the email asynchronously.
 	token, err := randomHex(32)
-	if err != nil {
-		return user, nil // non-fatal: user was created, just no email yet
+	if err == nil {
+		_ = s.tokens.CreateEmailVerificationToken(ctx, token, user.ID, time.Now().Add(verifyTokenTTL))
+		go s.mailer.SendVerification(email, token) //nolint:errcheck
 	}
-	_ = s.tokens.CreateEmailVerificationToken(ctx, token, user.ID, time.Now().Add(verifyTokenTTL))
-	go s.mailer.SendVerification(email, token) //nolint:errcheck
 
-	return user, nil
+	// Auto-login: issue tokens so the client can proceed without a separate login step.
+	pair, err := s.issueTokens(ctx, user, "", "", "")
+	if err != nil {
+		return nil, user, err
+	}
+
+	return pair, user, nil
 }
 
 // Login validates credentials, creates a session, and returns a token pair.

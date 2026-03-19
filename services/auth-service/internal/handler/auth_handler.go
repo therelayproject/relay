@@ -65,14 +65,19 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		writeJSON(w, http.StatusBadRequest, map[string]string{"error": "VALIDATION_ERROR", "message": "invalid JSON"})
 		return
 	}
-	user, err := h.auth.Register(r.Context(), req.Email, req.Password, req.DisplayName)
+	pair, user, err := h.auth.Register(r.Context(), req.Email, req.Password, req.DisplayName)
 	if err != nil {
 		writeError(w, err)
 		return
 	}
-	writeJSON(w, http.StatusCreated, map[string]string{
-		"user_id": user.ID,
-		"message": "Verification email sent",
+	writeJSON(w, http.StatusCreated, map[string]any{
+		"user": map[string]any{
+			"id":           user.ID,
+			"email":        user.Email,
+			"display_name": req.DisplayName,
+		},
+		"accessToken":  pair.AccessToken,
+		"refreshToken": pair.RefreshToken,
 	})
 }
 
