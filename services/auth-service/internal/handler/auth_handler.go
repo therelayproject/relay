@@ -90,15 +90,19 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	}
 	ua := r.Header.Get("User-Agent")
 	ip := realIP(r)
-	pair, err := h.auth.Login(r.Context(), req.Email, req.Password, "", ua, ip)
+	pair, user, err := h.auth.Login(r.Context(), req.Email, req.Password, "", ua, ip)
 	if err != nil {
 		writeError(w, err)
 		return
 	}
 	writeJSON(w, http.StatusOK, map[string]any{
-		"access_token":  pair.AccessToken,
-		"refresh_token": pair.RefreshToken,
-		"expires_in":    900,
+		"accessToken":  pair.AccessToken,
+		"refreshToken": pair.RefreshToken,
+		"user": map[string]any{
+			"id":           user.ID,
+			"email":        user.Email,
+			"display_name": user.Email, // display_name not stored on user domain yet
+		},
 	})
 }
 

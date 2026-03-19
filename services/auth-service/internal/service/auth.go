@@ -91,27 +91,31 @@ func (s *AuthService) Register(ctx context.Context, email, password, displayName
 	return pair, user, nil
 }
 
-// Login validates credentials, creates a session, and returns a token pair.
-func (s *AuthService) Login(ctx context.Context, email, password, deviceName, userAgent, ip string) (*domain.TokenPair, error) {
+// Login validates credentials, creates a session, and returns a token pair and user.
+func (s *AuthService) Login(ctx context.Context, email, password, deviceName, userAgent, ip string) (*domain.TokenPair, *domain.User, error) {
 	user, err := s.users.GetByEmail(ctx, email)
 	if err != nil {
 		// Return generic error to prevent user enumeration.
-		return nil, apperrors.New(apperrors.CodeUnauthenticated, "invalid credentials")
+		return nil, nil, apperrors.New(apperrors.CodeUnauthenticated, "invalid credentials")
 	}
 
 	if !user.IsActive {
-		return nil, apperrors.New(apperrors.CodePermissionDenied, "account deactivated")
+		return nil, nil, apperrors.New(apperrors.CodePermissionDenied, "account deactivated")
 	}
 
 	if user.PasswordHash == "" {
-		return nil, apperrors.New(apperrors.CodeUnauthenticated, "this account uses OAuth login")
+		return nil, nil, apperrors.New(apperrors.CodeUnauthenticated, "this account uses OAuth login")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.PasswordHash), []byte(password)); err != nil {
-		return nil, apperrors.New(apperrors.CodeUnauthenticated, "invalid credentials")
+		return nil, nil, apperrors.New(apperrors.CodeUnauthenticated, "invalid credentials")
 	}
 
-	return s.issueTokens(ctx, user, deviceName, userAgent, ip)
+	pair, err := s.issueTokens(ctx, user, deviceName, userAgent, ip)
+	if err != nil {
+		return nil, nil, err
+	}
+	return pair, user, nil
 }
 
 // OAuthLogin handles the OAuth2 callback flow for a given provider.

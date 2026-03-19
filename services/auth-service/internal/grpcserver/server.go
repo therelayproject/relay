@@ -24,7 +24,7 @@ func New(auth *service.AuthService) *AuthGRPCServer {
 // The Device field from the request is passed as the deviceName; user-agent
 // and IP are empty because they are not available over gRPC.
 func (s *AuthGRPCServer) Login(ctx context.Context, req *authv1.LoginRequest) (*authv1.LoginResponse, error) {
-	pair, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), req.GetDevice(), "", "")
+	pair, _, err := s.auth.Login(ctx, req.GetEmail(), req.GetPassword(), req.GetDevice(), "", "")
 	if err != nil {
 		return nil, apperrors.GRPCStatus(err)
 	}
