@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"fmt"
+	"net"
 	"net/http"
 	"strconv"
 	"sync"
@@ -41,6 +42,11 @@ func RateLimitRedis(rdb *redis.Client, keyPrefix string, limit int, window time.
 			ip := r.RemoteAddr
 			if fwd := r.Header.Get("X-Forwarded-For"); fwd != "" {
 				ip = fwd
+			}
+			// Strip port — RemoteAddr is "host:port"; we key on IP only so all
+			// connections from the same client share one counter.
+			if host, _, err := net.SplitHostPort(ip); err == nil {
+				ip = host
 			}
 
 			now := time.Now().Unix()
@@ -92,6 +98,9 @@ func RateLimit(rps float64, burst int) func(http.Handler) http.Handler {
 			ip := r.RemoteAddr
 			if fwd := r.Header.Get("X-Forwarded-For"); fwd != "" {
 				ip = fwd
+			}
+			if host, _, err := net.SplitHostPort(ip); err == nil {
+				ip = host
 			}
 			if !getLimiter(ip).Allow() {
 				http.Error(w, "rate limit exceeded", http.StatusTooManyRequests)

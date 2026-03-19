@@ -12,7 +12,7 @@ ARG SERVICE
 COPY services/${SERVICE}/ ./services/${SERVICE}/
 
 WORKDIR /workspace/services/${SERVICE}
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /service ./cmd/service/...
+RUN GOWORK=off CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /service ./cmd/service/...
 
 # ── Runtime stage ─────────────────────────────────────────────────────────────
 FROM gcr.io/distroless/static:nonroot

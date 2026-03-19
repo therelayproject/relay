@@ -28,7 +28,7 @@ func (r *UserRepo) Create(ctx context.Context, email, passwordHash string) (*dom
 	err := r.db.QueryRow(ctx, `
 		INSERT INTO users (email, password_hash)
 		VALUES ($1, $2)
-		RETURNING id, email, password_hash, totp_secret, totp_enabled, email_verified, is_active, created_at, updated_at
+		RETURNING id, email, COALESCE(password_hash, ''), COALESCE(totp_secret, ''), totp_enabled, email_verified, is_active, created_at, updated_at
 	`, email, passwordHash).Scan(
 		&u.ID, &u.Email, &u.PasswordHash, &u.TOTPSecret, &u.TOTPEnabled,
 		&u.EmailVerified, &u.IsActive, &u.CreatedAt, &u.UpdatedAt,
@@ -46,7 +46,7 @@ func (r *UserRepo) Create(ctx context.Context, email, passwordHash string) (*dom
 func (r *UserRepo) GetByID(ctx context.Context, id string) (*domain.User, error) {
 	var u domain.User
 	err := r.db.QueryRow(ctx, `
-		SELECT id, email, password_hash, totp_secret, totp_enabled, email_verified, is_active, created_at, updated_at
+		SELECT id, email, COALESCE(password_hash, ''), COALESCE(totp_secret, ''), totp_enabled, email_verified, is_active, created_at, updated_at
 		FROM users WHERE id = $1
 	`, id).Scan(
 		&u.ID, &u.Email, &u.PasswordHash, &u.TOTPSecret, &u.TOTPEnabled,
@@ -65,7 +65,7 @@ func (r *UserRepo) GetByID(ctx context.Context, id string) (*domain.User, error)
 func (r *UserRepo) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var u domain.User
 	err := r.db.QueryRow(ctx, `
-		SELECT id, email, password_hash, totp_secret, totp_enabled, email_verified, is_active, created_at, updated_at
+		SELECT id, email, COALESCE(password_hash, ''), COALESCE(totp_secret, ''), totp_enabled, email_verified, is_active, created_at, updated_at
 		FROM users WHERE email = $1
 	`, email).Scan(
 		&u.ID, &u.Email, &u.PasswordHash, &u.TOTPSecret, &u.TOTPEnabled,
@@ -131,7 +131,7 @@ func (r *UserRepo) CreateOAuthUser(ctx context.Context, email string) (*domain.U
 	err := r.db.QueryRow(ctx, `
 		INSERT INTO users (email, email_verified)
 		VALUES ($1, true)
-		RETURNING id, email, password_hash, totp_secret, totp_enabled, email_verified, is_active, created_at, updated_at
+		RETURNING id, email, COALESCE(password_hash, ''), COALESCE(totp_secret, ''), totp_enabled, email_verified, is_active, created_at, updated_at
 	`, email).Scan(
 		&u.ID, &u.Email, &u.PasswordHash, &u.TOTPSecret, &u.TOTPEnabled,
 		&u.EmailVerified, &u.IsActive, &u.CreatedAt, &u.UpdatedAt,

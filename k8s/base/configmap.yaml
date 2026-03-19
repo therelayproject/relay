@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: relay-config
+  namespace: relay
+data:
+  ENV: "production"
+  LOG_LEVEL: "info"
+  LOG_PRETTY: "false"
+  DATABASE_URL: "postgres://relay:$(POSTGRES_PASSWORD)@postgres:5432/relay?sslmode=disable"
+  REDIS_URL: "redis://redis:6379"
+  NATS_URL: "nats://nats:4222"
+  ELASTICSEARCH_URL: "http://elasticsearch:9200"
+  MINIO_ENDPOINT: "minio:9000"
+  MINIO_USE_SSL: "false"
+  BASE_URL: "https://relay.example.com"
+  JWT_ACCESS_TTL_SECONDS: "900"
+  JWT_REFRESH_TTL_SECONDS: "2592000"

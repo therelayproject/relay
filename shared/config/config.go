@@ -51,6 +51,33 @@ func Load[T any](prefix string) (*T, error) {
 	v.AutomaticEnv()
 	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 
+	// Explicitly bind env vars so Unmarshal picks them up.
+	for _, key := range []string{
+		"HTTP_PORT", "GRPC_PORT", "ENV",
+		"DATABASE_URL", "REDIS_URL", "NATS_URL",
+		"LOG_LEVEL", "LOG_PRETTY",
+		"JWT_SECRET", "JWT_ACCESS_TTL_SECONDS", "JWT_REFRESH_TTL_SECONDS",
+		"CORS_ALLOWED_ORIGINS",
+		// Auth-service specific
+		"SMTP_HOST", "SMTP_PORT", "SMTP_FROM", "SMTP_USERNAME", "SMTP_PASSWORD",
+		"BASE_URL",
+		"GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET",
+		"GITHUB_CLIENT_ID", "GITHUB_CLIENT_SECRET",
+		"RATE_LIMIT_AUTH_LIMIT", "RATE_LIMIT_AUTH_WINDOW_SECONDS",
+		// S3/MinIO
+		"S3_ENDPOINT", "S3_ACCESS_KEY", "S3_SECRET_KEY",
+		"S3_BUCKET_FILES", "S3_BUCKET_AVATARS",
+		// MinIO (file-service)
+		"MINIO_ENDPOINT", "MINIO_ACCESS_KEY", "MINIO_SECRET_KEY", "MINIO_USE_SSL",
+		// Elasticsearch
+		"ELASTICSEARCH_URL",
+		// Rate limiting (various services)
+		"RATE_LIMIT_UPLOAD_LIMIT", "RATE_LIMIT_UPLOAD_WINDOW_SECONDS",
+		"RATE_LIMIT_WS_LIMIT", "RATE_LIMIT_WS_WINDOW_SECONDS",
+	} {
+		_ = v.BindEnv(key)
+	}
+
 	// Sensible defaults
 	v.SetDefault("HTTP_PORT", 8080)
 	v.SetDefault("GRPC_PORT", 9090)

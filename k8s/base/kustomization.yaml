@@ -1,0 +1,28 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: relay
+
+resources:
+  # Namespace
+  - namespace.yaml
+  # Shared config
+  - configmap.yaml
+  - secret.yaml
+  # Infrastructure dependencies
+  - postgres.yaml
+  - redis.yaml
+  - nats.yaml
+  - elasticsearch.yaml
+  - minio.yaml
+  # Application services
+  - auth-service.yaml
+  - user-service.yaml
+  - workspace-service.yaml
+  - channel-service.yaml
+  - message-service.yaml
+  - ws-gateway.yaml
+  - presence-service.yaml
+  - notification-service.yaml
+  - search-service.yaml
+  - file-service.yaml
