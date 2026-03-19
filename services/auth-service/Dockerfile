@@ -9,7 +9,7 @@ COPY go.work go.work.sum* ./
 COPY shared/ ./shared/
 
 ARG SERVICE
-COPY services/${SERVICE}/ ./services/${SERVICE}/
+COPY services/ ./services/
 
 WORKDIR /workspace/services/${SERVICE}
 RUN GOWORK=off CGO_ENABLED=0 GOOS=linux go build -ldflags="-w -s" -o /service ./cmd/service/...
