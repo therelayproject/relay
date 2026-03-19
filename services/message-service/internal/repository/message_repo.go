@@ -36,7 +36,7 @@ func (r *MessageRepo) Create(ctx context.Context, m *domain.Message) (*domain.Me
 		VALUES ($1, $2, $3, $4, $5, $6, $7)
 		ON CONFLICT (idempotency_key) DO UPDATE SET id = relay_messages.id
 		RETURNING id, channel_id, author_id, body, body_parsed,
-		          thread_id, parent_id, idempotency_key,
+		          thread_id::text, parent_id::text, idempotency_key::text,
 		          is_edited, is_deleted, reply_count, created_at, updated_at
 	`, m.ChannelID, m.AuthorID, m.Body, nullableJSON(m.BodyParsed),
 		m.ThreadID, m.ParentID, m.IdempotencyKey,
@@ -58,7 +58,7 @@ func (r *MessageRepo) GetByID(ctx context.Context, id string) (*domain.Message, 
 	var bodyParsedRaw []byte
 	err := r.db.QueryRow(ctx, `
 		SELECT id, channel_id, author_id, body, body_parsed,
-		       thread_id, parent_id, idempotency_key,
+		       thread_id::text, parent_id::text, idempotency_key::text,
 		       is_edited, is_deleted, reply_count, created_at, updated_at
 		FROM relay_messages
 		WHERE id = $1 AND is_deleted = FALSE
@@ -101,7 +101,7 @@ func (r *MessageRepo) ListByChannel(ctx context.Context, channelID string, limit
 	if cursorTime.IsZero() {
 		rows, err = r.db.Query(ctx, `
 			SELECT id, channel_id, author_id, body, body_parsed,
-			       thread_id, parent_id, idempotency_key,
+			       thread_id::text, parent_id::text, idempotency_key::text,
 			       is_edited, is_deleted, reply_count, created_at, updated_at
 			FROM relay_messages
 			WHERE channel_id = $1 AND is_deleted = FALSE AND thread_id IS NULL
@@ -111,7 +111,7 @@ func (r *MessageRepo) ListByChannel(ctx context.Context, channelID string, limit
 	} else {
 		rows, err = r.db.Query(ctx, `
 			SELECT id, channel_id, author_id, body, body_parsed,
-			       thread_id, parent_id, idempotency_key,
+			       thread_id::text, parent_id::text, idempotency_key::text,
 			       is_edited, is_deleted, reply_count, created_at, updated_at
 			FROM relay_messages
 			WHERE channel_id = $1 AND is_deleted = FALSE AND thread_id IS NULL
@@ -166,7 +166,7 @@ func (r *MessageRepo) ListThread(ctx context.Context, threadID string, limit int
 	if cursorTime.IsZero() {
 		rows, err = r.db.Query(ctx, `
 			SELECT id, channel_id, author_id, body, body_parsed,
-			       thread_id, parent_id, idempotency_key,
+			       thread_id::text, parent_id::text, idempotency_key::text,
 			       is_edited, is_deleted, reply_count, created_at, updated_at
 			FROM relay_messages
 			WHERE thread_id = $1 AND is_deleted = FALSE
@@ -176,7 +176,7 @@ func (r *MessageRepo) ListThread(ctx context.Context, threadID string, limit int
 	} else {
 		rows, err = r.db.Query(ctx, `
 			SELECT id, channel_id, author_id, body, body_parsed,
-			       thread_id, parent_id, idempotency_key,
+			       thread_id::text, parent_id::text, idempotency_key::text,
 			       is_edited, is_deleted, reply_count, created_at, updated_at
 			FROM relay_messages
 			WHERE thread_id = $1 AND is_deleted = FALSE
@@ -217,7 +217,7 @@ func (r *MessageRepo) Update(ctx context.Context, id, authorID, body string, bod
 		SET body = $1, body_parsed = $2, is_edited = TRUE, updated_at = NOW()
 		WHERE id = $3 AND author_id = $4 AND is_deleted = FALSE
 		RETURNING id, channel_id, author_id, body, body_parsed,
-		          thread_id, parent_id, idempotency_key,
+		          thread_id::text, parent_id::text, idempotency_key::text,
 		          is_edited, is_deleted, reply_count, created_at, updated_at
 	`, body, nullableJSON(bodyParsed), id, authorID,
 	).Scan(
