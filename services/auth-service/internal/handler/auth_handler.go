@@ -72,9 +72,9 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	}
 	writeJSON(w, http.StatusCreated, map[string]any{
 		"user": map[string]any{
-			"id":           user.ID,
-			"email":        user.Email,
-			"display_name": req.DisplayName,
+			"id":          user.ID,
+			"email":       user.Email,
+			"displayName": req.DisplayName,
 		},
 		"accessToken":  pair.AccessToken,
 		"refreshToken": pair.RefreshToken,
@@ -99,9 +99,9 @@ func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 		"accessToken":  pair.AccessToken,
 		"refreshToken": pair.RefreshToken,
 		"user": map[string]any{
-			"id":           user.ID,
-			"email":        user.Email,
-			"display_name": user.Email, // display_name not stored on user domain yet
+			"id":          user.ID,
+			"email":       user.Email,
+			"displayName": user.Email,
 		},
 	})
 }
